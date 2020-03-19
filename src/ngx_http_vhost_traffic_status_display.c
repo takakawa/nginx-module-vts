@@ -397,39 +397,15 @@ ngx_http_vhost_traffic_status_display_handler_default(ngx_http_request_t *r)
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
-    if (format == NGX_HTTP_VHOST_TRAFFIC_STATUS_FORMAT_JSON) {
-        shpool = (ngx_slab_pool_t *) vtscf->shm_zone->shm.addr;
-        ngx_shmtx_lock(&shpool->mutex);
-        b->last = ngx_http_vhost_traffic_status_display_set(r, b->last);
-        ngx_shmtx_unlock(&shpool->mutex);
+    shpool = (ngx_slab_pool_t *) vtscf->shm_zone->shm.addr;
+    ngx_shmtx_lock(&shpool->mutex);
+    b->last = ngx_http_vhost_traffic_status_display_prometheus_set(r, b->last);
+    ngx_shmtx_unlock(&shpool->mutex);
 
-        if (b->last == b->pos) {
-            b->last = ngx_sprintf(b->last, "{}");
-        }
-
-    } else if (format == NGX_HTTP_VHOST_TRAFFIC_STATUS_FORMAT_JSONP) {
-        shpool = (ngx_slab_pool_t *) vtscf->shm_zone->shm.addr;
-        ngx_shmtx_lock(&shpool->mutex);
-        b->last = ngx_sprintf(b->last, "%V", &vtscf->jsonp);
-        b->last = ngx_sprintf(b->last, "(");
-        b->last = ngx_http_vhost_traffic_status_display_set(r, b->last);
-        b->last = ngx_sprintf(b->last, ")");
-        ngx_shmtx_unlock(&shpool->mutex);
-
-    } else if (format == NGX_HTTP_VHOST_TRAFFIC_STATUS_FORMAT_PROMETHEUS) {
-        shpool = (ngx_slab_pool_t *) vtscf->shm_zone->shm.addr;
-        ngx_shmtx_lock(&shpool->mutex);
-        b->last = ngx_http_vhost_traffic_status_display_prometheus_set(r, b->last);
-        ngx_shmtx_unlock(&shpool->mutex);
-
-        if (b->last == b->pos) {
-            b->last = ngx_sprintf(b->last, "#");
-        }
-
+    if (b->last == b->pos) {
+        b->last = ngx_sprintf(b->last, "#");
     }
-    else {
-        b->last = ngx_sprintf(b->last, NGX_HTTP_VHOST_TRAFFIC_STATUS_HTML_DATA, &uri, &uri);
-    }
+
 
     r->headers_out.status = NGX_HTTP_OK;
     r->headers_out.content_length_n = b->last - b->pos;

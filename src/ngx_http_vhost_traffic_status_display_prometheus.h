@@ -7,6 +7,10 @@
 #ifndef _NGX_HTTP_VTS_DISPLAY_PROMETHEUS_H_INCLUDED_
 #define _NGX_HTTP_VTS_DISPLAY_PROMETHEUS_H_INCLUDED_
 
+#define NGX_HTTP_VHOST_TRAFFIC_STATUS_PROMETHEUS_FMT_CONF                      \
+    "# HELP nginx_vts_conf_info Nginx conf info\n"                             \
+    "# TYPE nginx_vts_conf_info gauge\n"                                       \
+    "nginx_vts_conf_worker_processes{hostname=\"%V\"} %uA\n"
 
 #define NGX_HTTP_VHOST_TRAFFIC_STATUS_PROMETHEUS_FMT_MAIN                      \
     "# HELP nginx_vts_info Nginx info\n"                                       \

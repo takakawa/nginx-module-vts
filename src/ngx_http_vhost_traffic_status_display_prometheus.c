@@ -8,6 +8,18 @@
 #include "ngx_http_vhost_traffic_status_shm.h"
 #include "ngx_http_vhost_traffic_status_display_prometheus.h"
 
+u_char *
+ngx_http_vhost_traffic_status_display_prometheus_set_conf(ngx_http_request_t *r,
+    u_char *buf)
+{
+    ngx_core_conf_t  *ccf;
+
+    ccf = (ngx_core_conf_t *) ngx_get_conf(ngx_cycle->conf_ctx, ngx_core_module);
+
+    buf = ngx_sprintf(buf, NGX_HTTP_VHOST_TRAFFIC_STATUS_PROMETHEUS_FMT_CONF,&ngx_cycle->hostname, ccf->worker_processes);
+
+    return buf;
+}
 
 u_char *
 ngx_http_vhost_traffic_status_display_prometheus_set_main(ngx_http_request_t *r,
@@ -495,6 +507,9 @@ ngx_http_vhost_traffic_status_display_prometheus_set(ngx_http_request_t *r,
     ngx_memzero(&vtscf->stats, sizeof(vtscf->stats));
     ngx_http_vhost_traffic_status_node_time_queue_init(&vtscf->stats.stat_request_times);
 
+    /* nginx conf */
+    buf = ngx_http_vhost_traffic_status_display_prometheus_set_conf(r, buf);
+    
     /* main & connections */
     buf = ngx_http_vhost_traffic_status_display_prometheus_set_main(r, buf);
 
